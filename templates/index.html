@@ -1,203 +1,456 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Digital Pioneer Bot Chris</title>
+
     <style>
-        /* CSS styles */
+
         body {
+
             font-family: 'Times New Roman', Times, serif;
+
             margin: 0;
+
             padding: 0;
+
             display: flex;
+
             justify-content: center;
+
             align-items: center;
+
             height: 100vh;
-            background-color: #f0f0f0;
+
         }
+
         .chat-container {
+
             background-color: white;
+
             width: 100%;
-            max-width: 700px; 
+
+            max-width: 600px;
+
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
             border-radius: 8px;
+
             overflow: hidden;
+
             display: flex;
+
             flex-direction: column;
-            box-sizing: border-box;
-        }
-        .chat-header {
-            background-color: #007bff;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.2em;
+
             position: relative;
+
         }
-        .exit-button {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .exit-button:hover {
-            background-color: #cc0000;
-        }
-        .chat-messages {
-            padding: 15px;
-            height: 400px;
-            overflow-y: auto;
-            flex-grow: 1;
-            box-sizing: border-box;
-        }
-        .message {
-            margin-bottom: 10px;
-        }
-        .user-message, .bot-message {
-            padding: 10px;
-            border-radius: 8px;
-            display: inline-block;
-            max-width: 95%;
-            overflow-wrap: break-word;
-            white-space: pre-wrap;
-        }
-        .user-message {
-            text-align: left;
-            color: #007bff;
-            background-color: #f0f8ff;
-        }
-        .bot-message {
-            text-align: left;
-            color: #333;
-            background-color: #e9e9e9;
-        }
-        .loading {
-            display: inline-block;
-            background-color: #e9e9e9;
-            border-radius: 8px;
-            padding: 10px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { opacity: 0.2; }
-        }
-        .chat-input {
-            display: flex;
-            border-top: 1px solid #ccc;
-        }
-        .chat-input textarea {
-            flex-grow: 1;
-            padding: 15px;
-            border: none;
-            outline: none;
-            resize: none;
-        }
-        .chat-input button {
-            padding: 15px;
-            border: none;
+
+        .chat-header {
+
             background-color: #007bff;
+
             color: white;
+
+            padding: 15px;
+
+            text-align: center;
+
+            font-size: 1.2em;
+
+            position: relative;
+
+        }
+
+        .exit-button {
+
+            position: absolute;
+
+            top: 15px;
+
+            right: 15px;
+
+            background-color: #ff0000;
+
+            color: white;
+
+            border: none;
+
+            border-radius: 5px;
+
+            padding: 5px 10px;
+
             cursor: pointer;
+
         }
+
+        .exit-button:hover {
+
+            background-color: #cc0000;
+
+        }
+
+        .chat-messages {
+
+            padding: 15px;
+
+            height: 300px;
+
+            overflow-y: auto;
+
+            flex-grow: 1;
+
+            box-sizing: border-box; /* Ensures padding doesn't overflow */
+
+            word-break: break-word; /* Forces breaks in long words */
+
+        }
+
+       
+
+        .message {
+
+            margin-bottom: 10px;
+
+        }
+
+        .user-message {
+
+            text-align: left;
+
+            color: #007bff;
+
+            background-color: #f0f8ff;
+
+            padding: 10px;
+
+            border-radius: 8px;
+
+            display: inline-block;
+
+            max-width: 80%;
+
+            word-wrap: break-word;
+
+        }
+
+        .bot-message {
+
+            text-align: left;
+
+            color: #333;
+
+            background-color: #e9e9e9;
+
+            padding: 10px;
+
+            border-radius: 8px;
+
+            display: inline-block;
+
+            max-width: 200%; /* Adjusted to ensure full-width adherence */
+
+            overflow-wrap: break-word; /* Wraps long words or URLs */
+
+            box-sizing: border-box;
+
+            white-space: pre-wrap;
+
+        }
+
+       
+
+       
+
+        .loading {
+
+            display: inline-block;
+
+            background-color: #e9e9e9;
+
+            border-radius: 8px;
+
+            padding: 10px;
+
+            max-width: 80%;
+
+            animation: pulse 1.5s infinite;
+
+        }
+
+        @keyframes pulse {
+
+            0% {
+
+                opacity: 0.2;
+
+            }
+
+            50% {
+
+                opacity: 1;
+
+            }
+
+            100% {
+
+                opacity: 0.2;
+
+            }
+
+        }
+
+        .chat-input {
+
+            display: flex;
+
+            border-top: 1px solid #ccc;
+
+        }
+
+        .chat-input textarea {
+
+            flex-grow: 1;
+
+            padding: 15px;
+
+            border: none;
+
+            outline: none;
+
+            resize: none; /* Prevent textarea from being resized */
+
+        }
+
+        .chat-input button {
+
+            padding: 15px;
+
+            border: none;
+
+            background-color: #007bff;
+
+            color: white;
+
+            cursor: pointer;
+
+        }
+
         .chat-input button:hover {
+
             background-color: #0056b3;
+
         }
+
     </style>
+
 </head>
+
 <body>
+
     <div class="chat-container">
+
         <div class="chat-header">
+
             Chat with Digital Pioneer Bot Chris
+
             <button class="exit-button" onclick="exitChat()">Exit</button>
+
         </div>
-        <div class="chat-messages" id="chat-messages"></div>
+
+        <div class="chat-messages" id="chat-messages">
+
+            <!-- Messages will be appended here -->
+
+        </div>
+
         <div class="chat-input">
+
             <textarea id="message" placeholder="Type your message..." required rows="3"></textarea>
+
             <button onclick="sendMessage()">Send</button>
+
         </div>
+
     </div>
 
+
+
     <script>
+
+        // Prevent Enter key from sending the message
+
         document.getElementById('message').addEventListener('keydown', function(event) {
+
             if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
+
+                event.preventDefault();  // Prevent new line from sending the message
+
+                sendMessage();  // Send the message only on clicking the Send button
+
             }
+
         });
 
-        async function sendMessage() {
-            const messageInput = document.getElementById('message');
-            const message = messageInput.value.trim().replace(/\n/g, '<br>'); 
-            
-            if (!message) return;
 
-            messageInput.value = '';  
+
+        async function sendMessage() {
+
+            const messageInput = document.getElementById('message');
+
+            const message = messageInput.value.replace(/\n/g, '<br>');  // Replace new lines with <br> for HTML display
+
+            messageInput.value = '';  // Clear the input field
+
+       
+
             const chatMessages = document.getElementById('chat-messages');
 
+       
+
+            // Append user message to chat with formatting
+
             const userMessageDiv = document.createElement('div');
+
             userMessageDiv.classList.add('message', 'user-message');
-            userMessageDiv.innerHTML = <div>${message}</div>;
+
+            userMessageDiv.innerHTML = `<div>${message}</div>`;
+
             chatMessages.appendChild(userMessageDiv);
 
+       
+
+            // Create and display the loading indicator for the bot response
+
             const loadingDiv = document.createElement('div');
+
             loadingDiv.classList.add('message', 'bot-message', 'loading');
-            loadingDiv.innerHTML = <div>...</div>;
+
+            loadingDiv.innerHTML = `<div>...</div>`;
+
             chatMessages.appendChild(loadingDiv);
 
+       
+
+            // Auto-scroll to the latest message
+
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+       
+
+            // Retry logic: Attempt to send request up to 3 times
 
             const maxRetries = 3;
+
             let attempts = 0;
+
             let success = false;
 
+       
+
             while (attempts < maxRetries && !success) {
+
                 try {
+
                     attempts++;
+
                     const response = await fetch('/chat', {
+
                         method: 'POST',
+
                         headers: {
+
                             'Content-Type': 'application/json',
+
                         },
+
                         body: JSON.stringify({ message }),
+
                     });
 
+       
+
                     if (!response.ok) {
-                        throw new Error(Server error: ${response.statusText});
+
+                        throw new Error(`Server error: ${response.statusText}`);
+
                     }
+
+       
 
                     const data = await response.json();
-                    const botResponse = data.response;
 
-                    loadingDiv.classList.remove('loading');
-                    loadingDiv.innerHTML = <div>${botResponse}</div>;
-                    success = true;
+       
+
+                    // Remove asterisk symbols (*) from the bot response
+
+                    // Format the bot response to retain indentation in code snippets
+
+                    const botResponse = data.response.replace(/\*/g, '').replace(/```([^`]*)```/g, '<pre><code>$1</code></pre>');
+
+       
+
+                    // Replace the loading indicator with the actual bot response
+
+                    loadingDiv.classList.remove('loading'); // Remove loading effect
+
+                    loadingDiv.innerHTML = `<div>${botResponse}</div>`;
+
+                    success = true;  // Mark the request as successful
 
                 } catch (error) {
-                    console.log(Attempt ${attempts} failed:, error);
+
+                    console.log(`Attempt ${attempts} failed:`, error);
+
+       
+
+                    // If max retries are reached, show an error message
 
                     if (attempts >= maxRetries) {
-                        loadingDiv.classList.remove('loading');
-                        loadingDiv.innerHTML = <div>Sorry, something went wrong. Please try again later.</div>;
+
+                        loadingDiv.classList.remove('loading'); // Remove loading effect
+
+                        loadingDiv.innerHTML = `<div>Sorry, something went wrong. Please try again.</div>`;
+
                     } else {
+
+                        // Wait a moment before retrying
+
                         await new Promise(resolve => setTimeout(resolve, 1000));
+
                     }
+
                 }
+
             }
 
+       
+
+            // Auto-scroll to the latest message
+
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
         }
 
+       
+
         function exitChat() {
+
             parent.postMessage('exit', '*');
+
         }
+
     </script>
+
+
+
 </body>
+
 </html>
+
