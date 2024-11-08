@@ -147,11 +147,15 @@
             userMessageDiv.innerHTML = `<div>${message}</div>`;
             chatMessages.appendChild(userMessageDiv);
 
+            // Scroll to bottom after adding the user message
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
             const loadingDiv = document.createElement('div');
             loadingDiv.classList.add('message', 'bot-message', 'loading');
             loadingDiv.innerHTML = `<div>...</div>`;
             chatMessages.appendChild(loadingDiv);
 
+            // Scroll to bottom to show the loading message
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             const maxRetries = 3;
@@ -192,6 +196,7 @@
                 }
             }
 
+            // Scroll to the bottom after updating the bot's message
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
