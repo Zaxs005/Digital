@@ -5,242 +5,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Pioneer Bot Chris</title>
     <style>
+        /* CSS styles */
         body {
-
             font-family: 'Times New Roman', Times, serif;
-
             margin: 0;
-
             padding: 0;
-
             display: flex;
-
             justify-content: center;
-
             align-items: center;
-
             height: 100vh;
-
+            background-color: #f0f0f0;
         }
-
         .chat-container {
-
             background-color: white;
-
             width: 100%;
-
-            max-width: 600px;
-
+            max-width: 700px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
             border-radius: 8px;
-
             overflow: hidden;
-
             display: flex;
-
             flex-direction: column;
-
-            position: relative;
-
-        }
-
-        .chat-header {
-
-            background-color: #007bff;
-
-            color: white;
-
-            padding: 15px;
-
-            text-align: center;
-
-            font-size: 1.2em;
-
-            position: relative;
-
-        }
-
-        .exit-button {
-
-            position: absolute;
-
-            top: 15px;
-
-            right: 15px;
-
-            background-color: #ff0000;
-
-            color: white;
-
-            border: none;
-
-            border-radius: 5px;
-
-            padding: 5px 10px;
-
-            cursor: pointer;
-
-        }
-
-        .exit-button:hover {
-
-            background-color: #cc0000;
-
-        }
-
-        .chat-messages {
-
-            padding: 15px;
-
-            height: 300px;
-
-            overflow-y: auto;
-
-            flex-grow: 1;
-
-            box-sizing: border-box; /* Ensures padding doesn't overflow */
-
-            word-break: break-word; /* Forces breaks in long words */
-
-        }
-
-       
-
-        .message {
-
-            margin-bottom: 10px;
-
-        }
-
-        .user-message {
-
-            text-align: left;
-
-            color: #007bff;
-
-            background-color: #f0f8ff;
-
-            padding: 10px;
-
-            border-radius: 8px;
-
-            display: inline-block;
-
-            max-width: 80%;
-
-            word-wrap: break-word;
-
-        }
-
-        .bot-message {
-
-            text-align: left;
-
-            color: #333;
-
-            background-color: #e9e9e9;
-
-            padding: 10px;
-
-            border-radius: 8px;
-
-            display: inline-block;
-
-            max-width: 200%; /* Adjusted to ensure full-width adherence */
-
-            overflow-wrap: break-word; /* Wraps long words or URLs */
-
             box-sizing: border-box;
-
-            white-space: pre-wrap;
-
         }
-
-       
-
-       
-
-        .loading {
-
-            display: inline-block;
-
-            background-color: #e9e9e9;
-
-            border-radius: 8px;
-
-            padding: 10px;
-
-            max-width: 80%;
-
-            animation: pulse 1.5s infinite;
-
-        }
-
-        @keyframes pulse {
-
-            0% {
-
-                opacity: 0.2;
-
-            }
-
-            50% {
-
-                opacity: 1;
-
-            }
-
-            100% {
-
-                opacity: 0.2;
-
-            }
-
-        }
-
-        .chat-input {
-
-            display: flex;
-
-            border-top: 1px solid #ccc;
-
-        }
-
-        .chat-input textarea {
-
-            flex-grow: 1;
-
-            padding: 15px;
-
-            border: none;
-
-            outline: none;
-
-            resize: none; /* Prevent textarea from being resized */
-
-        }
-
-        .chat-input button {
-
-            padding: 15px;
-
-            border: none;
-
+        .chat-header {
             background-color: #007bff;
-
             color: white;
-
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            position: relative;
+        }
+        .exit-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
             cursor: pointer;
-
         }
-
+        .exit-button:hover {
+            background-color: #cc0000;
+        }
+        .chat-messages {
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            flex-grow: 1;
+            box-sizing: border-box;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .user-message, .bot-message {
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            max-width: 95%;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .user-message {
+            text-align: left;
+            color: #007bff;
+            background-color: #f0f8ff;
+        }
+        .bot-message {
+            text-align: left;
+            color: #333;
+            background-color: #e9e9e9;
+        }
+        .loading {
+            display: inline-block;
+            background-color: #e9e9e9;
+            border-radius: 8px;
+            padding: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ccc;
+        }
+        .chat-input textarea {
+            flex-grow: 1;
+            padding: 15px;
+            border: none;
+            outline: none;
+            resize: none;
+        }
+        .chat-input button {
+            padding: 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
         .chat-input button:hover {
-
             background-color: #0056b3;
-
         }
-
     </style>
 </head>
 <body>
@@ -255,6 +124,7 @@
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
+
     <script>
         document.getElementById('message').addEventListener('keydown', function(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -265,11 +135,11 @@
 
         async function sendMessage() {
             const messageInput = document.getElementById('message');
-            const message = messageInput.value.trim().replace(/\n/g, '<br>');
+            const message = messageInput.value.trim().replace(/\n/g, '<br>'); 
             
             if (!message) return;
 
-            messageInput.value = '';
+            messageInput.value = '';  
             const chatMessages = document.getElementById('chat-messages');
 
             const userMessageDiv = document.createElement('div');
@@ -281,6 +151,7 @@
             loadingDiv.classList.add('message', 'bot-message', 'loading');
             loadingDiv.innerHTML = `<div>...</div>`;
             chatMessages.appendChild(loadingDiv);
+
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             const maxRetries = 3;
@@ -303,7 +174,7 @@
                     }
 
                     const data = await response.json();
-                    const botResponse = data.response.replace(/\*/g, '').replace(/```([^`]*)```/g, '<pre><code>$1</code></pre>');
+                    const botResponse = data.response;
 
                     loadingDiv.classList.remove('loading');
                     loadingDiv.innerHTML = `<div>${botResponse}</div>`;
@@ -320,6 +191,7 @@
                     }
                 }
             }
+
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
