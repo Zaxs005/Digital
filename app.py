@@ -1,4 +1,4 @@
-import os  
+import os 
 from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
 import time
@@ -25,81 +25,13 @@ generation_config = {
 model = genai.GenerativeModel(
     model_name="gemini-1.5-pro",
     generation_config=generation_config,
+    system_instruction="""You are a chatbot named ProgMatics Bot Chris or Chris...
+    """ # Keep your full system instruction as before
 )
-
-# Define system instructions
-system_instruction = """
-You are a chatbot named ProgMatics Bot Chris or Chris. 
-You are only capable of giving information regarding the following subjects:
-
-1. The user can ask about the meanings of basic programming fundamentals and programming languages only in Java, C++, and Python, and the chatbot will give a specific answer, also about its history, who made and discovered it. It must also answer what the program's output and error are.
-
-2. The user can ask about the meanings of Mathematics mainly in Discrete Math and Calculus, and the chatbot will give a specific explanation, including history, who made and discovered it.
-
-The topics in Discrete Math should only answer are mainly the following:
-- Relation
-- Function
-- Sets
-- Proposition
-- Cardinality
-- Sequence and Series
-- Permutations
-- Combinations
-
-The topics in Calculus should only answer the following topics:
-- Functions
-- Logarithmic Functions
-- Limits
-- Derivatives
-
-3. If a user asks a question outside of these topics, reply: "Forgive me, I only answer queries about Programming and Math."
-
-4. Provide responses in a glossary format.
-
-5. When users ask about Discrete Math and Calculus and also Programming, the chatbot should mention if it enhances Logical Thinking, Analytical Thinking, or Critical Thinking.
-
-6. If a user asks for a solution to a problem or how to solve something in Calculus or Discrete Math, the chatbot must answer and also provide links related to the topic.
-
-7. When a user asks for programming code, the chatbot must answer with code examples and provide links.
-
-Thank you for asking, here is your answer:
-"""
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
-# Function to check if the message contains allowed topics
-def is_valid_question(user_input):
-    allowed_keywords = ['c++', 'java', 'python', 'discrete math', 'calculus']
-    discrete_math_keywords = ['relation', 'function', 'sets', 'proposition', 'cardinality', 
-                              'sequence', 'series', 'permutations', 'combinations']
-    calculus_keywords = ['functions', 'logarithmic functions', 'limits', 'derivatives']
-    basic_programming_questions = [
-        "what is programming",
-        "what is python",
-        "what is c++",
-        "what is java",
-        "what is discrete math",
-        "what is calculus"
-    ]
-    problem_solving_keywords = ['how to solve', 'solution', 'solve', 'steps to solve']
-
-    user_input = user_input.lower()  # Make the input case-insensitive
-    
-    # Check for valid topics in programming or math
-    if any(keyword in user_input for keyword in allowed_keywords):
-        return True
-    if any(keyword in user_input for keyword in discrete_math_keywords):
-        return True
-    if any(keyword in user_input for keyword in calculus_keywords):
-        return True
-    if any(question in user_input for question in basic_programming_questions):
-        return True
-    if any(keyword in user_input for keyword in problem_solving_keywords):
-        return True
-
-    return False
 
 def call_api_with_retry(chat_session, user_input, retries=3):
     for attempt in range(retries):
@@ -117,14 +49,9 @@ def chat():
     if not user_input:
         return jsonify({"response": "No message received"})
 
-    # Check if the input contains valid keywords or basic programming questions
-    if not is_valid_question(user_input):
-        return jsonify({"response": "Forgive me, I only answer queries about Programming and Math."})
-
     try:
         # Initialize chat session with no history for statelessness
         chat_session = model.start_chat(history=[])
-        chat_session.set_system_instruction(system_instruction)  # Ensure system instructions are applied
         
         # Use retry function to send the message
         response = call_api_with_retry(chat_session, user_input)
