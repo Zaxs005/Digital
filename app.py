@@ -90,7 +90,7 @@ def call_api_with_retry(chat_session, user_input, retries=3):
     return None
 
 @app.route('/chat', methods=['POST'])
-def chat():
+def chat(): 
     user_input = request.json.get('message')
     if not user_input:
         return jsonify({"response": "No message received"})
