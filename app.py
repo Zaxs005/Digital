@@ -56,7 +56,7 @@ def chat():
         # Use retry function to send the message
         response = call_api_with_retry(chat_session, user_input)
         
-        if response:
+        if response: 
             formatted_response = format_response(response.text)
             return jsonify({"response": formatted_response})
         else:
