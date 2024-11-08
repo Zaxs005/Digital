@@ -144,18 +144,14 @@
 
             const userMessageDiv = document.createElement('div');
             userMessageDiv.classList.add('message', 'user-message');
-            userMessageDiv.innerHTML = `<div>${message}</div>`;
+            userMessageDiv.innerHTML = <div>${message}</div>;
             chatMessages.appendChild(userMessageDiv);
-
-            // Scroll to bottom after adding the user message
-            chatMessages.scrollTop = chatMessages.scrollHeight;
 
             const loadingDiv = document.createElement('div');
             loadingDiv.classList.add('message', 'bot-message', 'loading');
-            loadingDiv.innerHTML = `<div>...</div>`;
+            loadingDiv.innerHTML = <div>...</div>;
             chatMessages.appendChild(loadingDiv);
 
-            // Scroll to bottom to show the loading message
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             const maxRetries = 3;
@@ -174,29 +170,28 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Server error: ${response.statusText}`);
+                        throw new Error(Server error: ${response.statusText});
                     }
 
                     const data = await response.json();
                     const botResponse = data.response;
 
                     loadingDiv.classList.remove('loading');
-                    loadingDiv.innerHTML = `<div>${botResponse}</div>`;
+                    loadingDiv.innerHTML = <div>${botResponse}</div>;
                     success = true;
 
                 } catch (error) {
-                    console.log(`Attempt ${attempts} failed:`, error);
+                    console.log(Attempt ${attempts} failed:, error);
 
                     if (attempts >= maxRetries) {
                         loadingDiv.classList.remove('loading');
-                        loadingDiv.innerHTML = `<div>Sorry, something went wrong. Please try again later.</div>`;
+                        loadingDiv.innerHTML = <div>Sorry, something went wrong. Please try again later.</div>;
                     } else {
                         await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
             }
 
-            // Scroll to the bottom after updating the bot's message
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
