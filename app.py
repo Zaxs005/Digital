@@ -58,8 +58,9 @@ def index():
 
 def is_valid_question(user_input):
     """
-    Determines if the user's input is within the allowed topics.
+    Determines if the user's input is within the allowed topics, or is a greeting.
     """
+    greetings = ['hello', 'hi', 'who are you', 'what are you', 'hey', 'hi there']
     programming_keywords = ['java', 'javascript', 'c++', 'python', 'output of this code', 'error in this code']
     discrete_math_keywords = ['relation', 'function', 'sets', 'proposition', 'cardinality', 'sequence and series', 'permutations', 'combinations']
     calculus_keywords = ['functions', 'logarithmic functions', 'limits', 'derivatives']
@@ -67,6 +68,8 @@ def is_valid_question(user_input):
 
     user_input_lower = user_input.lower()
 
+    if any(greeting in user_input_lower for greeting in greetings):
+        return 'greeting'
     if any(keyword in user_input_lower for keyword in programming_keywords):
         return True
     if any(keyword in user_input_lower for keyword in discrete_math_keywords):
@@ -90,13 +93,19 @@ def call_api_with_retry(chat_session, user_input, retries=3):
     return None
 
 @app.route('/chat', methods=['POST'])
-def chat(): 
+def chat():
     user_input = request.json.get('message')
     if not user_input:
         return jsonify({"response": "No message received"})
 
     # Validate the user's question
-    if not is_valid_question(user_input):
+    validation_result = is_valid_question(user_input)
+
+    # Handle greetings separately
+    if validation_result == 'greeting':
+        return jsonify({"response": "Hello! I am ProgMatics Bot Chris, your assistant for programming and math topics. I can help you with Java, JavaScript, C++, Python, and topics in Discrete Math and Calculus. How can I assist you today?"})
+
+    if not validation_result:
         return jsonify({"response": "Forgive me, I only answer queries about Programming and Math."})
 
     try:
@@ -114,14 +123,22 @@ def chat():
 
 def format_response(response_text):
     """
-    Formats the chatbot's response into a clean HTML structure without extra symbols like *.
+    Formats the chatbot's response into a clean HTML structure.
     """
-    response_text = response_text.replace('*', '')
-    response_text = re.sub(r'```(\w+)?\n([\s\S]*?)```', r'<pre><code>\2</code></pre>', response_text)
-    response_text = re.sub(r'`([^`]+)`', r'<code>\1</code>', response_text)
-    response_lines = response_text.split("\n\n")
-    formatted_lines = [f"<p>{line}</p>" for line in response_lines]
-    return "".join(formatted_lines)
+    try:
+        # Handle potential multiline response cleanly
+        response_text = response_text.replace('*', '')
+        response_text = re.sub(r'```(\w+)?\n([\s\S]*?)```', r'<pre><code>\2</code></pre>', response_text)
+        response_text = re.sub(r'`([^`]+)`', r'<code>\1</code>', response_text)
+        
+        # Split the response into lines and format them correctly
+        response_lines = response_text.split("\n\n")  # Split by two newlines
+        formatted_lines = [f"<p>{line.strip()}</p>" for line in response_lines if line.strip()]  # Remove empty lines and strip
+        return "".join(formatted_lines)
+    
+    except Exception as e:
+        print(f"Error formatting response: {e}")
+        return "<p>There was an issue formatting the response.</p>"
 
 if __name__ == '__main__':
     app.run(debug=True)
