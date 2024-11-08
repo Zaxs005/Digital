@@ -183,7 +183,7 @@
                 } catch (error) {
                     console.log(Attempt ${attempts} failed:, error);
 
-                    if (attempts >= maxRetries) {
+                    if (attempts >= maxRetries) { 
                         loadingDiv.classList.remove('loading');
                         loadingDiv.innerHTML = <div>Sorry, something went wrong. Please try again later.</div>;
                     } else {
