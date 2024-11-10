@@ -1,437 +1,220 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Chat with AI Chris</title>
-
     <style>
-
         body {
-
             font-family: 'Times New Roman', Times, serif;
-
             margin: 0;
-
             padding: 0;
-
             display: flex;
-
             justify-content: center;
-
             align-items: center;
-
             height: 100vh;
-
         }
-
         .chat-container {
-
             background-color: white;
-
             width: 100%;
-
             max-width: 600px;
-
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
             border-radius: 8px;
-
             overflow: hidden;
-
             display: flex;
-
             flex-direction: column;
-
             position: relative;
-
         }
-
         .chat-header {
-
             background-color: #007bff;
-
             color: white;
-
             padding: 15px;
-
             text-align: center;
-
             font-size: 1.2em;
-
             position: relative;
-
         }
-
         .exit-button {
-
             position: absolute;
-
             top: 15px;
-
             right: 15px;
-
             background-color: #ff0000;
-
             color: white;
-
             border: none;
-
             border-radius: 5px;
-
             padding: 5px 10px;
-
             cursor: pointer;
-
         }
-
         .exit-button:hover {
-
             background-color: #cc0000;
-
         }
-
         .chat-messages {
-
             padding: 15px;
-
             height: 300px;
-
             overflow-y: auto;
-
             flex-grow: 1;
-
-            box-sizing: border-box; /* Ensures padding doesn't overflow */
-
-            word-break: break-word; /* Forces breaks in long words */
-
+            box-sizing: border-box;
+            word-break: break-word;
         }
-
-       
-
         .message {
-
             margin-bottom: 10px;
-
         }
-
         .user-message {
             text-align: left;
             color: #007bff;
-            background-color: #f0f8ff;
             padding: 10px;
             border-radius: 8px;
-            display: block; /* Changed to block */
-            max-width: 80%;
+            display: inline-block; /* Inline-block to control width dynamically */
+            max-width: 80%; /* Max width of the message */
             word-wrap: break-word;
+            background-color: #f0f8ff; /* Default background color */
         }
-        
         .bot-message {
             text-align: left;
             color: #333;
             background-color: #e9e9e9;
             padding: 10px;
             border-radius: 8px;
-            display: block; /* Changed to block */
-            max-width: 100%; /* Adjust as needed */
+            display: inline-block;
+            max-width: 100%;
             overflow-wrap: break-word;
             box-sizing: border-box;
             white-space: pre-wrap;
         }
-        
-
-       
-
-       
-
         .loading {
-
             display: inline-block;
-
             background-color: #e9e9e9;
-
             border-radius: 8px;
-
             padding: 10px;
-
             max-width: 80%;
-
             animation: pulse 1.5s infinite;
-
         }
-
         @keyframes pulse {
-
-            0% {
-
-                opacity: 0.2;
-
-            }
-
-            50% {
-
-                opacity: 1;
-
-            }
-
-            100% {
-
-                opacity: 0.2;
-
-            }
-
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
         }
-
         .chat-input {
-
             display: flex;
-
             border-top: 1px solid #ccc;
-
         }
-
         .chat-input textarea {
-
             flex-grow: 1;
-
             padding: 15px;
-
             border: none;
-
             outline: none;
-
-            resize: none; /* Prevent textarea from being resized */
-
+            resize: none;
         }
-
         .chat-input button {
-
             padding: 15px;
-
             border: none;
-
             background-color: #007bff;
-
             color: white;
-
             cursor: pointer;
-
         }
-
         .chat-input button:hover {
-
             background-color: #0056b3;
-
         }
-
     </style>
-
 </head>
 
 <body>
-
     <div class="chat-container">
-
         <div class="chat-header">
-
             Chat with AI Chris
-
             <button class="exit-button" onclick="exitChat()">Exit</button>
-
         </div>
-
         <div class="chat-messages" id="chat-messages">
-
             <!-- Messages will be appended here -->
-
         </div>
-
         <div class="chat-input">
-
             <textarea id="message" placeholder="Type your message..." required rows="3"></textarea>
-
             <button onclick="sendMessage()">Send</button>
-
         </div>
-
     </div>
 
-
-
     <script>
-
-        // Prevent Enter key from sending the message
-
         document.getElementById('message').addEventListener('keydown', function(event) {
-
             if (event.key === 'Enter' && !event.shiftKey) {
-
-                event.preventDefault();  // Prevent new line from sending the message
-
-                sendMessage();  // Send the message only on clicking the Send button
-
+                event.preventDefault();
+                sendMessage();
             }
-
         });
 
-
-
         async function sendMessage() {
-
             const messageInput = document.getElementById('message');
-
-            const message = messageInput.value.replace(/\n/g, '<br>');  // Replace new lines with <br> for HTML display
-
-            messageInput.value = '';  // Clear the input field
-
-       
+            const message = messageInput.value.replace(/\n/g, '<br>');
+            messageInput.value = '';
 
             const chatMessages = document.getElementById('chat-messages');
 
-       
+            // Calculate width based on message length
+            const messageWidth = getMessageWidth(message.length);
 
-            // Append user message to chat with formatting
-
+            // Append user message with dynamic width
             const userMessageDiv = document.createElement('div');
-
             userMessageDiv.classList.add('message', 'user-message');
-
+            userMessageDiv.style.width = messageWidth;
             userMessageDiv.innerHTML = `<div>${message}</div>`;
-
             chatMessages.appendChild(userMessageDiv);
 
-       
-
-            // Create and display the loading indicator for the bot response
-
+            // Create loading indicator for bot response
             const loadingDiv = document.createElement('div');
-
             loadingDiv.classList.add('message', 'bot-message', 'loading');
-
             loadingDiv.innerHTML = `<div>...</div>`;
-
             chatMessages.appendChild(loadingDiv);
 
-       
-
-            // Auto-scroll to the latest message
-
             chatMessages.scrollTop = chatMessages.scrollHeight;
-
-       
-
-            // Retry logic: Attempt to send request up to 3 times
 
             const maxRetries = 3;
-
             let attempts = 0;
-
             let success = false;
 
-       
-
             while (attempts < maxRetries && !success) {
-
                 try {
-
                     attempts++;
-
                     const response = await fetch('/chat', {
-
                         method: 'POST',
-
-                        headers: {
-
-                            'Content-Type': 'application/json',
-
-                        },
-
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ message }),
-
                     });
 
-       
-
-                    if (!response.ok) {
-
-                        throw new Error(`Server error: ${response.statusText}`);
-
-                    }
-
-       
+                    if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
 
                     const data = await response.json();
-
-       
-
-                    // Remove asterisk symbols (*) from the bot response
-
-                    // Format the bot response to retain indentation in code snippets
-
                     const botResponse = data.response.replace(/\*/g, '').replace(/```([^`]*)```/g, '<pre><code>$1</code></pre>');
 
-       
-
-                    // Replace the loading indicator with the actual bot response
-
-                    loadingDiv.classList.remove('loading'); // Remove loading effect
-
+                    loadingDiv.classList.remove('loading');
                     loadingDiv.innerHTML = `<div>${botResponse}</div>`;
-
-                    success = true;  // Mark the request as successful
-
+                    success = true;
                 } catch (error) {
-
                     console.log(`Attempt ${attempts} failed:`, error);
 
-       
-
-                    // If max retries are reached, show an error message
-
                     if (attempts >= maxRetries) {
-
-                        loadingDiv.classList.remove('loading'); // Remove loading effect
-
+                        loadingDiv.classList.remove('loading');
                         loadingDiv.innerHTML = `<div>Sorry, something went wrong. Please try again.</div>`;
-
                     } else {
-
-                        // Wait a moment before retrying
-
                         await new Promise(resolve => setTimeout(resolve, 1000));
-
                     }
-
                 }
-
             }
 
-       
-
-            // Auto-scroll to the latest message
-
             chatMessages.scrollTop = chatMessages.scrollHeight;
-
         }
 
-       
+        // Function to determine width based on message length
+        function getMessageWidth(length) {
+            const maxWidth = 80; // Max width in percentage
+            const minWidth = 30; // Min width in percentage
+            const adjustedLength = Math.min(length, 100); // Cap length for width calculation
+            const widthPercent = minWidth + ((adjustedLength / 100) * (maxWidth - minWidth));
+            return `${widthPercent}%`;
+        }
 
         function exitChat() {
-
             parent.postMessage('exit', '*');
-
         }
-
     </script>
-
-
-
 </body>
 
 </html>
-
