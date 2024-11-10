@@ -1,104 +1,210 @@
-import os
-from flask import Flask, render_template, request, jsonify
-import google.generativeai as genai
-import time
+<!DOCTYPE html>
+<html lang="en">
 
-app = Flask(__name__)
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with AI Chris</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            background-color: white;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .chat-header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            position: relative;
+        }
+        .exit-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .exit-button:hover {
+            background-color: #cc0000;
+        }
+        .chat-messages {
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            flex-grow: 1;
+            box-sizing: border-box;
+            word-break: break-word;
+        }
+        .message-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .user-message {
+            align-self: flex-start;
+            color: #007bff;
+            background-color: #f0f8ff;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            margin-right: auto;
+            word-wrap: break-word;
+        }
+        .bot-message {
+            align-self: flex-start;
+            color: #333;
+            background-color: #e9e9e9;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            margin-top: 5px;
+            word-wrap: break-word;
+        }
+        .loading {
+            background-color: #e9e9e9;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ccc;
+        }
+        .chat-input textarea {
+            flex-grow: 1;
+            padding: 15px;
+            border: none;
+            outline: none;
+            resize: none;
+        }
+        .chat-input button {
+            padding: 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
 
-# Basic configurations
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
-app.config['PROPAGATE_EXCEPTIONS'] = True
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chat with AI Chris
+            <button class="exit-button" onclick="exitChat()">Exit</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be appended here -->
+        </div>
+        <div class="chat-input">
+            <textarea id="message" placeholder="Type your message..." required rows="3"></textarea>
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
 
-# Configure the API key
-genai.configure(api_key="AIzaSyCkqqY3QB2C7y5hcTfRhVDuGclUgfXWev0")
+    <script>
+        document.getElementById('message').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
 
-# Generation configuration
-generation_config = {
-    "temperature": 0.6,
-    "top_p": 0.7,
-    "top_k": 30,
-    "max_output_tokens": 512,
-    "response_mime_type": "text/plain",
-}
+        async function sendMessage() {
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value.replace(/\n/g, '<br>');
+            messageInput.value = '';
 
-# Model configuration with updated instruction
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    generation_config=generation_config,
-    system_instruction="""My name is AI.Chris or Chris your assistive ai partner. You are only capable of giving information regarding the following subjects:
+            const chatMessages = document.getElementById('chat-messages');
 
-1. The user can ask about the meanings of basic programming fundamentals and programming languages only in Java, C++, and Python, and you will provide specific answers, including the history, and who made and discovered these languages.
+            // Create a container for the user message and bot response
+            const messageGroup = document.createElement('div');
+            messageGroup.classList.add('message-group');
 
-2. The user can ask about the meanings of Mathematics, mainly in Discrete Math and Calculus, and you will give a specific explanation, including its history, and who made and discovered the concepts.
-   - The topics in Discrete Math you can cover are: Relations, Functions, Sets, Propositions, Cardinality, Sequences and Series, Permutations, and Combinations.
-   - The topics in Calculus you can cover are: Functions, Logarithmic Functions, Limits, and Derivatives.
+            // Append user message
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('user-message');
+            userMessageDiv.innerHTML = `<div>${message}</div>`;
+            messageGroup.appendChild(userMessageDiv);
 
-3. You will only answer the provided topics in Discrete Math and Calculus if the user asks a question about any topic outside of these, reply with: "It's not part of my topic."
+            // Add the loading indicator as a bot response placeholder
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('bot-message', 'loading');
+            loadingDiv.innerHTML = `<div>...</div>`;
+            messageGroup.appendChild(loadingDiv);
 
-4. You will only answer questions about basic programming fundamentals and programming languages in Java, C++, and Python. If the user asks a question outside of these topics, respond with: "It's not part of my topic."
+            // Append the message group to the chat
+            chatMessages.appendChild(messageGroup);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
 
-5. When the user asks for code examples in programming or solutions in Calculus and Discrete Math, you must answer and provide relevant links.
+            // Bot response handling
+            const maxRetries = 3;
+            let attempts = 0;
+            let success = false;
 
-6. All of your replies should be in a glossary-like format.
+            while (attempts < maxRetries && !success) {
+                try {
+                    attempts++;
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message }),
+                    });
 
-7. When users ask about Discrete Math, Calculus, or Programming, you should mention how the topic enhances:
-   - Logical Thinking
-   - Analytical Thinking
-   - Critical Thinking
+                    if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
 
-8. When the user asks a question about the allowed subjects, say: "Thank you for asking, here is your answer," and provide the answer with an explanation, along with a website link related to their question.
+                    const data = await response.json();
+                    const botResponse = data.response.replace(/\*/g, '').replace(/```([^`]*)```/g, '<pre><code>$1</code></pre>');
 
-9. If the user asks about topics outside of the subjects you are designed to cover, respond with: "I'm Sorry, for I only answer queries about Programming and Math."
+                    loadingDiv.classList.remove('loading');
+                    loadingDiv.innerHTML = `<div>${botResponse}</div>`;
+                    success = true;
+                } catch (error) {
+                    console.log(`Attempt ${attempts} failed:`, error);
 
-Limits:
-You will only answer questions about Discrete Math, Calculus, and Basic Programming fundamentals in Java, C++, and Python. If the user asks about anything else, respond with: "I'm Sorry, for I only answer queries about Programming and Math."
-    """
-)
+                    if (attempts >= maxRetries) {
+                        loadingDiv.classList.remove('loading');
+                        loadingDiv.innerHTML = `<div>Sorry, something went wrong. Please try again.</div>`;
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-def call_api_with_retry(user_input, retries=3):
-    backoff = 2  # Start with a 2-second delay for backoff
-    for attempt in range(retries):
-        try:
-            # Start a new chat session for each request to ensure fresh context
-            chat_session = model.start_chat(history=[])
-            response = chat_session.send_message(user_input)
-            if response:
-                print(f"Response received on attempt {attempt + 1}")
-                return response
-        except Exception as e:
-            print(f"Attempt {attempt + 1} failed with error: {e}")
-            if '429' in str(e):  # Check for rate-limiting error (429)
-                print(f"Rate limit exceeded. Retrying after {backoff} seconds...")
-            time.sleep(backoff)  # Delay before retrying
-            backoff *= 2  # Double the delay each attempt
-    print("Failed to get response after retries")
-    return None
+        function exitChat() {
+            parent.postMessage('exit', '*');
+        }
+    </script>
+</body>
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    user_input = request.json.get('message')
-    if not user_input:
-        return jsonify({"response": "No message received"})
-
-    try:
-        response = call_api_with_retry(user_input)
-        
-        if response:
-            formatted_response = format_response(response.text)
-            return jsonify({"response": formatted_response})
-        else:
-            print("No response received from chatbot.")
-            return jsonify({"response": "No response from the chatbot."})
-    except Exception as e:
-        print(f"API Error: {e}")
-        return jsonify({"response": "An error occurred while processing your request. Please try again later."})
-
-def format_response(response_text):
-    return "".join(f"<p>{line.strip()}</p>" for line in response_text.split("\n") if line.strip())
-
-if __name__ == '__main__':
-    app.run(debug=True)
+</html>
