@@ -78,11 +78,12 @@
             background-color: #e9e9e9;
             padding: 10px;
             border-radius: 8px;
-            max-width: 100%; /* Ensures the message box fits within the container */
-            width: fit-content; /* Allows message box to adjust width as needed */
+            max-width: 100%;
+            width: fit-content;
             margin-top: 5px;
             overflow-wrap: break-word;
-            white-space: pre-wrap; /* Ensures text wraps correctly within box */
+            white-space: pre-wrap;
+            position: relative; /* Required for absolute positioning of child elements */
         }
         .bot-message code {
             display: block;
@@ -93,6 +94,7 @@
             max-width: 100%;
             white-space: pre; /* Keeps code formatting */
         }
+        
         .loading {
             background-color: #e9e9e9;
             animation: pulse 1.5s infinite;
@@ -123,13 +125,29 @@
         .chat-input button:hover {
             background-color: #0056b3;
         }
+        .copy-button {
+            position: absolute;
+            bottom: 5px;
+            left: 5px; /* Aligns to the bottom-left */
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+        
     </style>
 </head>
 
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            Chat with CCSAi
+            Chat with AI CCSAi
             <button class="exit-button" onclick="exitChat()">Exit</button>
         </div>
         <div class="chat-messages" id="chat-messages">
@@ -153,34 +171,34 @@
             const messageInput = document.getElementById('message');
             const message = messageInput.value.replace(/\n/g, '<br>');
             messageInput.value = '';
-
+        
             const chatMessages = document.getElementById('chat-messages');
-
+        
             // Create a container for the user message and bot response
             const messageGroup = document.createElement('div');
             messageGroup.classList.add('message-group');
-
+        
             // Append user message
             const userMessageDiv = document.createElement('div');
             userMessageDiv.classList.add('user-message');
             userMessageDiv.innerHTML = `<div>${message}</div>`;
             messageGroup.appendChild(userMessageDiv);
-
+        
             // Add the loading indicator as a bot response placeholder
             const loadingDiv = document.createElement('div');
             loadingDiv.classList.add('bot-message', 'loading');
             loadingDiv.innerHTML = `<div>...</div>`;
             messageGroup.appendChild(loadingDiv);
-
+        
             // Append the message group to the chat
             chatMessages.appendChild(messageGroup);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-
+        
             // Bot response handling
             const maxRetries = 3;
             let attempts = 0;
             let success = false;
-
+        
             while (attempts < maxRetries && !success) {
                 try {
                     attempts++;
@@ -189,18 +207,21 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ message }),
                     });
-
+        
                     if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-
+        
                     const data = await response.json();
                     const botResponse = data.response.replace(/\*/g, '').replace(/```([^`]*)```/g, '<pre><code>$1</code></pre>');
-
+        
                     loadingDiv.classList.remove('loading');
-                    loadingDiv.innerHTML = `<div>${botResponse}</div>`;
+                    loadingDiv.innerHTML = `
+                        <div>${botResponse}</div>
+                        <button onclick="copyToClipboard(this)" class="copy-button">Copy</button>
+                    `;
                     success = true;
                 } catch (error) {
                     console.log(`Attempt ${attempts} failed:`, error);
-
+        
                     if (attempts >= maxRetries) {
                         loadingDiv.classList.remove('loading');
                         loadingDiv.innerHTML = `<div>Sorry, something went wrong. Please try again.</div>`;
@@ -209,9 +230,19 @@
                     }
                 }
             }
-
+        
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+        function copyToClipboard(button) {
+            const botMessageDiv = button.previousElementSibling;
+            const textToCopy = botMessageDiv.innerText || botMessageDiv.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Response copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+        
 
         function exitChat() {
             parent.postMessage('exit', '*');
