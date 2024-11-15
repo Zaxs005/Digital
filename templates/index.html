@@ -101,10 +101,13 @@
             background-color: #f4f4f4;
             padding: 5px;
             border-radius: 5px;
-            overflow-x: auto;
+            overflow-y: hidden;   /* Hide vertical scrollbar */
+            overflow-x: auto;     /* Enable horizontal scrolling */
             max-width: 100%;
-            white-space: pre;
-        }
+            white-space: nowrap;  /* Prevent code from wrapping and force horizontal scroll */
+            height: auto;         /* Allow height to adjust based on content */
+    }
+
 
         .loading {
             background-color: #e9e9e9;
