@@ -101,12 +101,11 @@
             background-color: #f4f4f4;
             padding: 5px;
             border-radius: 5px;
-            overflow-y: hidden;   /* Hide vertical scrollbar */
-            overflow-x: auto;     /* Enable horizontal scrolling */
-            max-width: 100%;
-            white-space: nowrap;  /* Prevent code from wrapping and force horizontal scroll */
-            height: auto;         /* Allow height to adjust based on content */
-    }
+            overflow-x: auto; /* Horizontal scroll enabled */
+            max-width: 100%;   /* Ensure the width doesn't overflow the container */
+            white-space: nowrap; /* Prevent code from wrapping, force horizontal scroll */
+            height: auto;      /* Adjust height automatically */
+        }
 
 
         .loading {
