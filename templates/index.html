@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with CCSAi</title>
+    <title>Chat with CCSai</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
@@ -90,6 +90,7 @@
             max-width: 100%;
             width: fit-content;
             margin-top: 5px;
+            margin-bottom: 5px;
             overflow-wrap: break-word;
             white-space: pre-wrap;
             position: relative;
@@ -151,18 +152,18 @@
 
         .copy-button {
             position: absolute;
-            top: 5px;
+            top: 3px;
             right: 5px;
-            padding: 3px 5px;
+            padding: 5px 10px; /* Increased padding for a larger button */
             background-color: #f9f9f6;
             color: black;
             border: none;
-            border-radius: 3px;
+            border-radius: 5px; /* Adjusted for a smoother look */
             cursor: pointer;
-            font-size: 0.7em;
+            font-size: 0.85em; /* Slightly larger font size */
             display: flex;
             align-items: center;
-            gap: 5px; /* Adds spacing between text and icon */
+            gap: 6px; /* Maintains spacing between text and icon */
         }
         
         .copy-button:hover {
@@ -170,13 +171,14 @@
             color: white;
         }
         
+        
     </style>
 </head>
 
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            Chat with AI CCSAi
+            Chat with CCSai
             <button class="exit-button" onclick="exitChat()">Exit</button>
         </div>
         <div class="chat-messages" id="chat-messages">
@@ -196,70 +198,76 @@
             }
         });
 
-        async function sendMessage() {
-            const messageInput = document.getElementById('message');
-            const message = messageInput.value.replace(/\n/g, '<br>');
-            messageInput.value = '';
+      async function sendMessage() {
+    const messageInput = document.getElementById('message');
+    const message = messageInput.value.replace(/\n/g, '<br>');
+    messageInput.value = '';
 
-            const chatMessages = document.getElementById('chat-messages');
+    const chatMessages = document.getElementById('chat-messages');
 
-            const messageGroup = document.createElement('div');
-            messageGroup.classList.add('message-group');
+    const messageGroup = document.createElement('div');
+    messageGroup.classList.add('message-group');
 
-            const userMessageDiv = document.createElement('div');
-            userMessageDiv.classList.add('user-message');
-            userMessageDiv.innerHTML = `<div>${message}</div>`;
-            messageGroup.appendChild(userMessageDiv);
+    const userMessageDiv = document.createElement('div');
+    userMessageDiv.classList.add('user-message');
+    userMessageDiv.innerHTML = `<div>${message}</div>`;
+    messageGroup.appendChild(userMessageDiv);
 
-            const loadingDiv = document.createElement('div');
-            loadingDiv.classList.add('bot-message', 'loading');
-            loadingDiv.innerHTML = `<div>...</div>`;
-            messageGroup.appendChild(loadingDiv);
+    const loadingDiv = document.createElement('div');
+    loadingDiv.classList.add('bot-message', 'loading');
+    loadingDiv.innerHTML = `<div>...</div>`;
+    messageGroup.appendChild(loadingDiv);
 
-            chatMessages.appendChild(messageGroup);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+    chatMessages.appendChild(messageGroup);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            const maxRetries = 3;
-            let attempts = 0;
-            let success = false;
+    const maxRetries = 3;
+    let attempts = 0;
+    let success = false;
 
-            while (attempts < maxRetries && !success) {
-                try {
-                    attempts++;
-                    const response = await fetch('/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message }),
-                    });
+    while (attempts < maxRetries && !success) {
+        try {
+            attempts++;
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message }),
+            });
 
-                    if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+            if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
 
-                    const data = await response.json();
-                    const botResponse = data.response.replace(/\*/g, '').replace(/```([^`]*)```/g, '<pre><code>$1</code></pre>');
+            const data = await response.json();
+            // This modification ensures proper indentation of code blocks
+            const botResponse = data.response.replace(/\*/g, '')
+                .replace(/```([^`]*)```/g, function(match, code) {
+                    // This handles code indentation
+                    const formattedCode = code.split('\n').map(line => line.trimStart()).join('\n');
+                    return `<pre><code style="white-space: pre-wrap;">${formattedCode}</code></pre>`;
+                });
 
-                    loadingDiv.classList.remove('loading');
-                    loadingDiv.innerHTML = `
-                    <div>${botResponse}</div>
-                    <button onclick="copyToClipboard(this)" class="copy-button">
-                         <span>Copy</span> <i class="fas fa-copy"></i>
-                    </button>
-                    `;
+            loadingDiv.classList.remove('loading');
+            loadingDiv.innerHTML = `
+                <div>${botResponse}</div>
+                <button onclick="copyToClipboard(this)" class="copy-button">
+                     <span>Copy</span> <i class="fas fa-copy"></i>
+                </button>
+            `;
 
-                    success = true;
-                } catch (error) {
-                    console.log(`Attempt ${attempts} failed:`, error);
+            success = true;
+        } catch (error) {
+            console.log(`Attempt ${attempts} failed:`, error);
 
-                    if (attempts >= maxRetries) {
-                        loadingDiv.classList.remove('loading');
-                        loadingDiv.innerHTML = `<div>Sorry, something went wrong. Please try again.</div>`;
-                    } else {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
+            if (attempts >= maxRetries) {
+                loadingDiv.classList.remove('loading');
+                loadingDiv.innerHTML = `<div>Sorry, something went wrong. Please try again.</div>`;
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
-
-            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+    }
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
         function copyToClipboard(button) {
             const botMessageDiv = button.previousElementSibling;
