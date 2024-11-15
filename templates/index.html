@@ -153,16 +153,16 @@
             position: absolute;
             top: 5px;
             right: 5px;
-            padding: 3px 5px; /* Reduced padding */
+            padding: 3px 5px;
             background-color: #f9f9f6;
             color: black;
             border: none;
-            border-radius: 3px; /* Smaller border-radius */
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 0.7em; /* Smaller font size */
+            font-size: 0.7em;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 5px; /* Adds spacing between text and icon */
         }
         
         .copy-button:hover {
@@ -203,27 +203,22 @@
 
             const chatMessages = document.getElementById('chat-messages');
 
-            // Create a container for the user message and bot response
             const messageGroup = document.createElement('div');
             messageGroup.classList.add('message-group');
 
-            // Append user message
             const userMessageDiv = document.createElement('div');
             userMessageDiv.classList.add('user-message');
             userMessageDiv.innerHTML = `<div>${message}</div>`;
             messageGroup.appendChild(userMessageDiv);
 
-            // Add the loading indicator as a bot response placeholder
             const loadingDiv = document.createElement('div');
             loadingDiv.classList.add('bot-message', 'loading');
             loadingDiv.innerHTML = `<div>...</div>`;
             messageGroup.appendChild(loadingDiv);
 
-            // Append the message group to the chat
             chatMessages.appendChild(messageGroup);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Bot response handling
             const maxRetries = 3;
             let attempts = 0;
             let success = false;
@@ -244,11 +239,12 @@
 
                     loadingDiv.classList.remove('loading');
                     loadingDiv.innerHTML = `
-                        <div>${botResponse}</div>
-                        <button onclick="copyToClipboard(this)" class="copy-button">
-                            <i class="fas fa-copy"></i> <!-- Copy icon added here -->
-                        </button>
+                    <div>${botResponse}</div>
+                    <button onclick="copyToClipboard(this)" class="copy-button">
+                         <span>Copy</span> <i class="fas fa-copy"></i>
+                    </button>
                     `;
+
                     success = true;
                 } catch (error) {
                     console.log(`Attempt ${attempts} failed:`, error);
