@@ -10,7 +10,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 # Configure the API key
-genai.configure(api_key="AIzaSyCkqqY3QB2C7y5hcTfRhVDuGclUgfXWev0")
+genai.configure(api_key="AIzaSyCbCM41NsQbhQMb7-wXg4B1v7xTEvgCV5Y")
 
 # Generation configuration
 generation_config = {
