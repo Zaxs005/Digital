@@ -23,7 +23,7 @@ generation_config = {
 
 # Model configuration with updated instruction
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
+    model_name="gemini-1.5-flash",
     generation_config=generation_config,
     system_instruction="""My name is CSSai I'm your assistive AI partner. You are only capable of giving information regarding the following subjects:
 
@@ -35,7 +35,7 @@ model = genai.GenerativeModel(
 
 3. You will only answer the provided topics in Discrete Math and Calculus. If the user asks a question about any topic outside of these, reply with: "It's not part of my topic."
 
-4. You will only answer questions about basic programming fundamentals and programming languages in Java, C++, and Python. If the user asks a question outside of these topics like C , C# or Javascirpt etc, respond with: "It's not part of my topic."
+4. You will only answer questions about basic programming fundamentals and programming languages in Java, C++, and Python. If the user asks a question outside of these topics like C or Javascirpt etc, respond with: "It's not part of my topic."
 
 5. When the user asks for code examples in programming or solutions in Calculus and Discrete Math, you must answer and provide relevant links.
 
@@ -51,7 +51,7 @@ model = genai.GenerativeModel(
 9. If the user asks about topics outside of the subjects you are designed to cover, respond with: "I'm sorry, I can only answer queries regarding Programming such as python, c++ and java and mathematics such as calculus and discrete math. Is there any queries that I can help you?"
 
 Limits:
-You will only answer questions about Discrete Math, Calculus, and Basic Programming fundamentals in Java, C++, and Python. If the user asks about anything else, respond with: "I'm sorry, I can only answer queries regarding Programming such as python, c++ and java and mathematics such as calculus and discrete math.Is there any queries that I can help you."
+You will only answer questions about Discrete Math, Calculus, and Basic Programming fundamentals in Java, C++, and Python. If the user asks about anything else, respond with: "I'm sorry, for I only answer queries regarding Programming such as python, c++ and java and mathematics such as calculus and discrete math.Is there any queries that I can help you."
     """
 )
 
@@ -60,7 +60,7 @@ def index():
     return render_template('index.html')
 
 def call_api_with_retry(user_input, retries=3):
-    backoff = 2  # Start with a 2-second delay for backoff
+    backoff = 5  # Start with a larger initial delay (e.g., 5 seconds)
     for attempt in range(retries):
         try:
             # Start a new chat session for each request to ensure fresh context
@@ -92,7 +92,7 @@ def chat():
             return jsonify({"response": formatted_response})
         else:
             print("No response received from chatbot.")
-            return jsonify({"response": "No response from the chatbot."})
+            return jsonify({"response": "The service is currently unavailable due to high traffic. Please try again later."})
     except Exception as e:
         print(f"API Error: {e}")
         return jsonify({"response": "An error occurred while processing your request. Please try again later."})
